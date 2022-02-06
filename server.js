@@ -19,7 +19,6 @@ wss.on("connection", (socket) => {
     );
     socket.send(JSON.stringify(data));
   }, 60000); //send the stringified resposne every minute
-  console.log("asdasd");
 });
 /** Todo
  * Authentication : json?
@@ -27,26 +26,38 @@ wss.on("connection", (socket) => {
  */
 
 PORT = process.env.PORT || 5000;
-
+let cached = false;
+let events_message = undefined;
 app.get("/status/model-events", async (req, res) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => {
-    console.log("Aborting...");
-    controller.abort();
-  }, 7000);
-  let running = false;
   //10.255.255.1.
   //events.blankly.finance/
-  await fetch("http://events.blankly.finance/", { signal: controller.signal })
-    .then(() => {
-      clearTimeout(timeoutId); //clear the timeout immediately
-      running = true;
-    })
-    .catch((error) => console.log(error));
 
-  return res.json({
-    running: running,
-  });
+  if (!cached) {
+    // cache miss
+    console.log("testing");
+    cached = true;
+    setTimeout(() => {
+      cached = false;
+    }, 60000); //restart the cache after 1 minute
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.log("Aborting...");
+      controller.abort();
+    }, 7000);
+    let running = false;
+    await fetch("http://events.blankly.finance/", { signal: controller.signal })
+      .then(() => {
+        clearTimeout(timeoutId); //clear the timeout immediately
+        running = true;
+      })
+      .catch((error) => console.log(error));
+
+    events_message = {
+      running: running,
+    };
+  }
+  return res.json(events_message);
 });
 
 //get time
