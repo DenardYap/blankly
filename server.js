@@ -1,7 +1,25 @@
 const express = require("express");
 const fetch = require("node-fetch"); //not gonna try the new fetch just yet :)
 const app = express();
+var expressWs = require("express-ws");
+const server = require("http").createServer(app);
+const WebSocket = require("ws");
 
+// const wss = new WebSocket.Server({ server: server });
+const wss = new WebSocket.Server({ server: server });
+
+wss.on("connection", (socket) => {
+  // setInterval(() => {
+  //   console.log("hello world");
+  // }, 60000);
+  console.log("A new client connected!!");
+  setInterval(async () => {
+    const data = await fetch("http://localhost:5000/status/model-events").then(
+      (res) => res.json()
+    );
+    socket.send(JSON.stringify(data));
+  }, 60000); //send the stringified resposne every minute
+});
 /** Todo
  * Authentication : json?
  * timeout is not working
@@ -25,7 +43,7 @@ app.get("/status/model-events", async (req, res) => {
     })
     .catch((error) => console.log(error));
 
-  res.json({
+  return res.json({
     running: running,
   });
 });
@@ -47,6 +65,6 @@ app.use("/secret", (req, res) => {
     message: "welcome",
   });
 });
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log("Connected");
 });
