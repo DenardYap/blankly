@@ -13,7 +13,6 @@
     // Create WebSocket connection.
     const socket = new WebSocket('ws://localhost:5000/status/model-events');
 
-
     // Listen for messages
     socket.addEventListener('message', function (event) {
         console.log(event.data);
