@@ -19,6 +19,7 @@ wss.on("connection", (socket) => {
     );
     socket.send(JSON.stringify(data));
   }, 60000); //send the stringified resposne every minute
+  console.log("asdasd");
 });
 /** Todo
  * Authentication : json?
